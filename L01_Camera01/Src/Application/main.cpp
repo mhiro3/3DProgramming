@@ -57,6 +57,16 @@ void Application::KdPostUpdate()
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 void Application::PreUpdate()
 {
+	// カメラ行列の更新
+	{
+		Math::Matrix _localPos =
+			Math::Matrix::CreateTranslation(0, 6.0f, 0);
+
+		//カメラのワールド行列を作成し、適用させる
+		Math::Matrix _worldMat = _localPos;
+		m_spCamera->SetCameraMatrix(_worldMat);
+	}
+
 }
 
 // ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
@@ -120,10 +130,15 @@ void Application::Draw()
 	// 陰影のあるオブジェクト(不透明な物体や2Dキャラ)はBeginとEndの間にまとめてDrawする
 	KdShaderManager::Instance().m_StandardShader.BeginLit();
 	{
-		Math::Matrix _mat =
-			Math::Matrix::CreateTranslation(0, 0, 5);
+		Math::Matrix _mat = Math::Matrix::Identity;
+		Math::Matrix::CreateTranslation(0, 0, 5);
+
+
 		KdShaderManager::Instance().
 			m_StandardShader.DrawPolygon(*m_spPoly, _mat);
+
+		KdShaderManager::Instance().
+			m_StandardShader.DrawModel(*m_spModel);
 	}
 	KdShaderManager::Instance().m_StandardShader.EndLit();
 
@@ -230,6 +245,13 @@ bool Application::Init(int w, int h)
 	// カメラ初期化
 	//===================================================================
 	m_spCamera = std::make_shared<KdCamera>();
+
+	//===================================================================
+	// 地形初期化
+	//===================================================================
+	m_spModel = std::make_shared<KdModelData>();
+	m_spModel->Load("Asset/Data/LessonData/Terrain/Terrain.gltf");
+
 
 	//===================================================================
 	// ハムスター初期化
